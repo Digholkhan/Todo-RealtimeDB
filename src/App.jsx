@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from "react";
 import "./App.css";
 import { ToastContainer, toast, Bounce } from "react-toastify";
-import { getDatabase, ref, set, push, onValue, remove } from "firebase/database";
+import { getDatabase, ref, set, push, onValue, remove,update } from "firebase/database";
 import { FaTrash } from "react-icons/fa";
 import { FaRegEdit } from "react-icons/fa";
 
@@ -100,16 +100,28 @@ function App() {
     setEditTask(value);
   }
 
-  const handleUpdate = () => {
-    console.log(allTodos[id].value.todoname);
-    
+  const handleUpdate = (e) => {
+    e.preventDefault();
+    const db = getDatabase();
+    update(ref(db , "todo/" + id),{
+      todoname: editTask,
+    }).then(() => {
+      toast.success("task has updated", {
+        icon: <FaRegEdit className="text-green-600" />,
+        theme: "dark",
+        autoClose: 2000,
+        className: "!bg-gray-800 !text-gray-100",
+      });
+      setEditTask("");
+    });
   }
 
   return (
     <>
+      <h1 className="text-center text-white text-5xl bg-gray-950 py-10">Todo Application</h1>
       <form
-        className="max-w-sm mx-auto mt-5 border border-gray-50 p-5 rounded-lg"
-        onSubmit={handleSubmit}
+        className="max-w-sm mx-auto mt-10 border border-gray-50 p-5 rounded-lg"
+        onSubmit={ edit ? handleUpdate : handleSubmit}
       >
         <ToastContainer />
         <div className="mb-5">
@@ -143,7 +155,7 @@ function App() {
           <button
             type="submit"
             className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={handleSubmit}
+            
           >
             Add Task
           </button>
@@ -151,7 +163,7 @@ function App() {
           <button
             type="submit"
             className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={(id) => handleUpdate(id)}
+            
           >
             Update Task
           </button>
@@ -174,7 +186,7 @@ function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleEditBtn(index, item.value.todoname)}
+                  onClick={() => handleEditBtn(item.id, item.value.todoname)}
                   className=""
                 >
                   <FaRegEdit className="text-green-600" />
